@@ -1,0 +1,3 @@
+If there aren't data files here, it likely means they're unable to be shared publicly due to participant confidentiality concerns. Specifically with the ML2 data, the not-deidentified data are kept secured and cannot be shared UNLESS the researcher gets ethical approval (typically from their university IRB) to use them. Email Rick raklein22@gmail.com  for more information about that.
+
+Note that most of this script can probably run with the deidentified, public datasets available on the Many Labs 2 OSF page.
