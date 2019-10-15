@@ -23,9 +23,28 @@ data <- readRDS("./data/ML2_RawData_S1.rds")
 # Select all numeric variables
 data <- select_if(data, is.numeric)
 
+# code the IMC pass/fail so we don't lose it in the next step.
+data <- data %>% 
+  rowwise() %>% 
+  mutate(imc_sum = sum(c(IMC1_1, IMC1_2, IMC1_3, IMC1_4), na.rm = TRUE))
+
+data$imc_pass <- 0
+data$imc_pass[data$imc_sum == 4] <- 1
+
 # Let's drop any variable with more than X percent missing values
 # These are typically site-specific variables (custom consent pages, etc.)
 data <- data[, -which(colMeans(is.na(data)) > 0.15)]
+
+# Still some junk variables remaining, deleting them:
+data <- data %>%
+  select(-Status, 
+         -Finished, 
+         -ml2int, 
+         -ml2int.t_1, 
+         -ml2int.t_2, 
+         -ml2int.t_3, 
+         -ml2int.t_4,
+         -van.p1.1)
 
 # drop rows with missing data in any column
 data <- data[complete.cases(data),]
