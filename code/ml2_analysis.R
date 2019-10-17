@@ -7,12 +7,17 @@ library(caret) # for rf
 
 # setwd() if not using the .rproj file
 
-# set a seed for all randomization. Note: R's default randomization method
-# changed in mid 2019, may not produce identical results in old versions.
-set.seed(1)
-
 # load the ml2 slate 1 data. Using the not-deidentified datasets
 data <- readRDS("./data/ML2_RawData_S1.rds")
+
+# Initialize a results data frame
+loop_result <- data.frame()
+
+# Set a seed for all randomization, so that results are reproducible. 
+# Note: R's default randomization method changed in mid 2019. I'm forcing it 
+# to use the old method so this code runs the same in both old and new versions
+RNGkind(sample.kind = "Rounding")
+set.seed(1)
 
 ################################################################################
 #### Data preparation ##########################################################
@@ -48,10 +53,31 @@ data <- data %>%
          -ml2int.t_2, 
          -ml2int.t_3, 
          -ml2int.t_4,
-         -van.p1.1)
+         -van.p1.1,
+         -LocationAccuracy,
+         -disg2.1,
+         -disg1.1,
+         -baudv.1,
+         -grah1.1,
+         -IMC1_1)
 
 # drop rows with missing data in any column
 data <- data[complete.cases(data),]
+
+#############
+# PCA
+#############
+# To reduce the # of individual items you can consider doing a PCA first
+
+data_pca <- prcomp(x = subset(data, select = -c(subjwell)), center = TRUE, scale. = TRUE, tol = 0.5)
+
+data_pca_df <- data.frame(subjwell = data$subjwell, data_pca$x)
+
+data <- data_pca_df
+
+# UNCOMMENT IF: You want to loop over several seeds (also uncomment the } at the end of the script)
+# for(i in 1:20){
+# set.seed(i)
 
 ################################################################################
 #### Data split ################################################################
@@ -126,9 +152,17 @@ crf_model <- cforest(subjwell ~ .,
                                                    testtype = "Univ", 
                                                    mincriterion = 0.95, 
                                                    ntree = 500,
-                                                   mtry = 5,
+                                                   mtry = 12,
                                                    replace = FALSE,
                                                    fraction = 0.632))
+
+# With CRF we can view the 'variable importance', or how much each variable
+# weighs into the prediction
+crf_variable_importance <- data.frame(varimp(crf_model))
+# keep row names as a column
+crf_variable_importance <- tibble::rownames_to_column(crf_variable_importance, "var")
+# Sort from strongest to weakest
+crf_variable_importance <- dplyr::arrange(crf_variable_importance, desc(varimp.crf_model.))
 
 # Extract predictions
 crf_prediction_train <- predict(crf_model) #oob
@@ -153,3 +187,9 @@ names(compare_results) <- c("Linear Regression R^2 - Training",
                             "Random Forest R^2 - Validation",
                             "Conditional RF R^2 - Training",
                             "Conditional RF R^2 - Validation")
+
+loop_result <- rbind(loop_result, compare_results)
+# }
+
+# Write results to .csv if you want
+# write.csv(loop_result, './results/loop_result.csv')
