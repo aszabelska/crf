@@ -69,11 +69,11 @@ data <- data[complete.cases(data),]
 #############
 # To reduce the # of individual items you can consider doing a PCA first
 
-data_pca <- prcomp(x = subset(data, select = -c(subjwell)), center = TRUE, scale. = TRUE, tol = 0.5)
-
-data_pca_df <- data.frame(subjwell = data$subjwell, data_pca$x)
-
-data <- data_pca_df
+# data_pca <- prcomp(x = subset(data, select = -c(subjwell)), center = TRUE, scale. = TRUE, tol = 0.5)
+# 
+# data_pca_df <- data.frame(subjwell = data$subjwell, data_pca$x)
+# 
+# data <- data_pca_df
 
 # UNCOMMENT IF: You want to loop over several seeds (also uncomment the } at the end of the script)
 # for(i in 1:20){
