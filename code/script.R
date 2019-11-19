@@ -18,7 +18,12 @@ source("./code/functions.R")
 # setwd() if not using the .rproj file
 
 # load the ml2 slate 1 data. Using the not-deidentified datasets
-data <- readRDS("./data/ML2_RawData_S1.rds")
+# data <- readRDS("./data/ML2_RawData_S1.rds")
+
+# or the deidentified data, which loses you demographics and some other vars
+# but can be shared publicly
+load("./data/ML2_S1.rda")
+data <- ML2_S1
 
 # Initialize a results data frame
 loop_result <- data.frame()
@@ -55,21 +60,21 @@ data$imc_pass[data$imc_sum == 4] <- 1
 data <- data[, -which(colMeans(is.na(data)) > 0.15)]
 
 # Still some junk variables remaining, deleting them:
-data <- data %>%
-  select(-Status, 
-         -Finished, 
-         -ml2int, 
-         -ml2int.t_1, 
-         -ml2int.t_2, 
-         -ml2int.t_3, 
-         -ml2int.t_4,
-         -van.p1.1,
-         -LocationAccuracy,
-         -disg2.1,
-         -disg1.1,
-         -baudv.1,
-         -grah1.1,
-         -IMC1_1)
+# Note: doing this in multiple calls so it doesn't fail if one var is missing
+data <- data %>% select(-Status)
+data <- data %>% select(-Finished)
+data <- data %>% select(-ml2int)
+data <- data %>% select(-ml2int.t_1)
+data <- data %>% select(-ml2int.t_2)
+data <- data %>% select(-ml2int.t_3)
+data <- data %>% select(-ml2int.t_4)
+data <- data %>% select(-van.p1.1)
+data <- data %>% select(-LocationAccuracy)
+data <- data %>% select(-disg2.1)
+data <- data %>% select(-disg1.1)
+data <- data %>% select(-baudv.1)
+data <- data %>% select(-grah1.1)
+data <- data %>% select(-IMC1_1)
 
 # drop rows with missing data in any column
 data <- data[complete.cases(data),]
@@ -84,10 +89,6 @@ data <- data[complete.cases(data),]
 # data_pca_df <- data.frame(subjwell = data$subjwell, data_pca$x)
 # 
 # data <- data_pca_df
-
-# UNCOMMENT IF: You want to loop over several seeds (also uncomment the } at the end of the script)
-# for(i in 1:20){
-# set.seed(i)
 
 ################################################################################
 #### Data split ################################################################
@@ -120,5 +121,3 @@ result_ross.s1.1_1_TEXT <- runmodels(train, validation, "ross.s1.1_1_TEXT")
 result_sise <- runmodels(train, validation, "sise")
 result_mood <- runmodels(train, validation, "mood")
 result_politics <- runmodels(train, validation, "politics")
-
-# }
