@@ -1,4 +1,9 @@
 ### Corresponding coder: Rick Klein raklein22@gmail.com 
+# Testing/comparing how well linear regression, random forest, and 
+# conditional random forests predict variables in the Many Labs 2 dataset.
+
+# This file provides an example to analyze the "subjective wellbeing" variable
+
 library(randomForest) # for crf
 library(party) # for crf
 library(tidyverse) # convenience tools for data handling
